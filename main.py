@@ -6,7 +6,18 @@ import json
 
 bot = commands.Bot(".", intents=discord.Intents.all(), help_command=None)
 
-fixedrate = 0  # 25
+# Change this value to 0 if you don't want a fixed rate.
+fixedrate = 25
+
+# How much exp is given to the user when they send a message
+expgiven = 5
+
+
+# Create a users folder if it doesn't exist
+
+if not os.path.exists("users"):
+    os.makedirs("users")
+
 
 
 async def expUp(message, expincrease):
@@ -30,14 +41,17 @@ async def expUp(message, expincrease):
 
     # How much exp it takes for the user to level up (the default value is 25 exp per level)
     if fixedrate != 0:
-        if userdata["totalexp"] % fixedrate == 0:
+        if userdata["exp"] % fixedrate == 0:
             # Level up
             if userdata["exp"] == fixedrate:
-                userdata["level"] = userdata["totalexp"]
+                userdata["level"] += 1
 
-            await message.channel.send(
-                f"{message.author.mention} has leveled up to level {userdata["level"]}!"
-            )
+            # Make the level up embed
+            levelembed = discord.Embed(title="**Level Up!**", description=f"**<@{userid}> has levelled up to level {userdata["level"]}\n\nExp needed for next level**: {fixedrate}")
+            levelembed.set_thumbnail(url=message.author.avatar)
+            levelembed.set_footer(text=bot.user.name, icon_url=bot.user.avatar)
+            
+            await message.channel.send(embed=levelembed)
             userdata["exp"] = 0
     else:  # Exp needed increases for every level
         global expneeded
@@ -49,9 +63,13 @@ async def expUp(message, expincrease):
             # Level up
             if userdata["exp"] == expneeded:
                 userdata["level"] += 1
-            await message.channel.send(
-                f"{message.author.mention} has leveled up to level {userdata["level"]}!"
-            )
+            
+            # Make the level up embed
+            levelembed = discord.Embed(title="**Level Up!**", description=f"<@{userid}> has levelled up to level {userdata["level"]}\n\nExp needed for next level: {baserate * ((userdata["level"] + 1) * 2)}")
+            levelembed.set_thumbnail(url=message.author.avatar)
+            levelembed.set_footer(text=bot.user.name, icon_url=bot.user.avatar)
+
+            await message.channel.send(embed=levelembed)
             userdata["exp"] = 0
 
     # Write to the json file
@@ -68,8 +86,10 @@ async def on_ready():
 @bot.event
 async def on_message(message):
     if message.author.id != bot.user.id:
-        await expUp(message, 5)
-    pass
+        await expUp(message, expgiven)
+    
+    
+    await bot.process_commands(message)
 
 
 # Start the bot.
