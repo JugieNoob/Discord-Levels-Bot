@@ -90,6 +90,15 @@ async def on_message(message):
     
     
     await bot.process_commands(message)
+    
+
+@bot.command("level")
+async def self(ctx):
+    userid = ctx.message.author.id
+    with open(f"users/{userid}.json", "r") as file:
+        userdata = json.load(file)    
+        
+        await ctx.send(f"You are currently level {userdata["level"]}")
 
 
 # Start the bot.
