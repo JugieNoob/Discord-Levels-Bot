@@ -21,6 +21,7 @@ if not os.path.exists("users"):
 
 
 async def expUp(message, expincrease):
+    global expneeded
     userid = message.author.id
 
     # Create a file for a user if they do not have one
@@ -38,9 +39,13 @@ async def expUp(message, expincrease):
 
     userdata["totalexp"] += expincrease
     userdata["exp"] += expincrease
+    
+    
 
     # How much exp it takes for the user to level up (the default value is 25 exp per level)
     if fixedrate != 0:
+        
+        expneeded = fixedrate - userdata["exp"]
         if userdata["exp"] % fixedrate == 0:
             # Level up
             if userdata["exp"] == fixedrate:
@@ -54,7 +59,7 @@ async def expUp(message, expincrease):
             await message.channel.send(embed=levelembed)
             userdata["exp"] = 0
     else:  # Exp needed increases for every level
-        global expneeded
+        
         baserate = 30
 
         expneeded = baserate * ((userdata["level"] + 1) * 2)
@@ -98,7 +103,13 @@ async def self(ctx):
     with open(f"users/{userid}.json", "r") as file:
         userdata = json.load(file)    
         
-        await ctx.send(f"You are currently level {userdata["level"]}")
+        levelembed = discord.Embed(title="**Level Information**", description=f"Current Level: **{userdata["level"]}**\n\nCurrent EXP: **{userdata["exp"]}**\nEXP Needed: **{expneeded}**\n\nTotal EXP: **{userdata["totalexp"]}**")
+        
+        levelembed.set_thumbnail(url=ctx.message.author.avatar)
+        levelembed.set_footer(text=bot.user.name, icon_url=bot.user.avatar)
+        
+        await ctx.send(embed=levelembed)
+
 
 
 # Start the bot.
