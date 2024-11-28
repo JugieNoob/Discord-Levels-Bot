@@ -40,8 +40,6 @@ async def expUp(message, expincrease):
     userdata["totalexp"] += expincrease
     userdata["exp"] += expincrease
     
-    
-    print("giving exp!")
     # How much exp it takes for the user to level up (the default value is 25 exp per level)
     if fixedrate != 0:
         
@@ -87,8 +85,50 @@ def fetchLevelLeaderboard():
         with open(f"users/{files}", "r") as file:
             global userdata
             userdata = json.load(file)
-            print(userdata["level"])
-            leaderboard.append([files.replace(".json", ""), userdata["level"]])
+            leaderboard.append({"level": int(userdata["level"]), "userid": int(file.name.replace("users/", "").replace(".json", ""))})
+            
+            
+    leaderboard.sort(reverse=True,key=lambda x: x["level"])
+    print(leaderboard)
+    
+    leaderboardembed = discord.Embed(title="Level Leaderboard")
+    
+    placement = 0
+    for value in leaderboard:
+        placement+=1
+        leaderboardembed.add_field(name=f"{placement}.", value=f"<@{int(value["userid"])}>: {value["level"]}", inline=False)
+        
+    leaderboardembed.set_thumbnail(url=bot.user.avatar)
+    leaderboardembed.set_footer(text=bot.user.name, icon_url=bot.user.avatar)
+            
+    return leaderboardembed
+
+
+
+def fetchExpLeaderboard():
+    leaderboard = []
+    for files in os.listdir("users/"):
+        with open(f"users/{files}", "r") as file:
+            global userdata
+            userdata = json.load(file)
+            leaderboard.append({"totalexp": int(userdata["totalexp"]), "userid": int(file.name.replace("users/", "").replace(".json", ""))})
+            
+            
+    leaderboard.sort(reverse=True,key=lambda x: x["totalexp"])
+    print(leaderboard)
+    
+    leaderboardembed = discord.Embed(title="EXP Leaderboard")
+    
+    placement = 0
+    for value in leaderboard:
+        placement+=1
+        leaderboardembed.add_field(name=f"{placement}.", value=f"<@{int(value["userid"])}>: {value["totalexp"]}", inline=False)
+        
+    leaderboardembed.set_thumbnail(url=bot.user.avatar)
+    leaderboardembed.set_footer(text=bot.user.name, icon_url=bot.user.avatar)
+            
+    return leaderboardembed
+
 
 @bot.event
 async def on_ready():
@@ -124,8 +164,13 @@ async def self(ctx, member:discord.User, exp:int):
     await ctx.send(f"Gave <@{member.id}> {exp} EXP!")
     
 @bot.command("leaderboard")
-async def self(ctx):
-    fetchLevelLeaderboard()
+async def self(ctx, choice = ""):
+    if choice.lower() == "level":
+        await ctx.send(embed=fetchLevelLeaderboard())
+    elif choice.lower() == "totalexp":
+        await ctx.send(embed=fetchExpLeaderboard())
+    else:
+        await ctx.send("Invalid choice! Please enter 'level' or 'totalexp'!")
     
 # Start the bot.
 load_dotenv()
