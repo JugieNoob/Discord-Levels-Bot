@@ -7,7 +7,7 @@ import json
 bot = commands.Bot(".", intents=discord.Intents.all(), help_command=None)
 
 # Change this value to 0 if you don't want a fixed rate.
-fixedrate = 25
+fixedrate = 0 #25
 
 # How much exp is given to the user when they send a message
 expgiven = 5
@@ -66,8 +66,9 @@ async def expUp(message, expincrease):
 
         if userdata["exp"] % expneeded == 0:
             # Level up
-            if userdata["exp"] == expneeded:
-                userdata["level"] += 1
+            
+            #if userdata["exp"] == expneeded:
+            userdata["level"] = userdata["totalexp"] // expneeded
             
             # Make the level up embed
             levelembed = discord.Embed(title="**Level Up!**", description=f"<@{userid}> has levelled up to level {userdata["level"]}\n\nExp needed for next level: {baserate * ((userdata["level"] + 1) * 2)}")
@@ -111,7 +112,11 @@ async def self(ctx):
         await ctx.send(embed=levelembed)
 
 
-
+@bot.command("giveexp")
+async def self(ctx, member:discord.User, exp:int):
+    await expUp(ctx.message, exp)
+    await ctx.send(f"Gave <@{member.id}> {exp} EXP!")
+    
 # Start the bot.
 load_dotenv()
 bot.run(os.getenv("TOKEN"))
