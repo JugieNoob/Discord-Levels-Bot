@@ -7,7 +7,7 @@ import json
 bot = commands.Bot(".", intents=discord.Intents.all(), help_command=None)
 
 # Change this value to 0 if you don't want a fixed rate.
-fixedrate = 0 #25
+fixedrate = 25
 
 # How much exp is given to the user when they send a message
 expgiven = 5
@@ -41,33 +41,30 @@ async def expUp(message, expincrease):
     userdata["exp"] += expincrease
     
     
-
+    print("giving exp!")
     # How much exp it takes for the user to level up (the default value is 25 exp per level)
     if fixedrate != 0:
         
         expneeded = fixedrate - userdata["exp"]
-        if userdata["exp"] % fixedrate == 0:
+        if userdata["level"] != userdata["totalexp"] // fixedrate:
             # Level up
-            if userdata["exp"] == fixedrate:
-                userdata["level"] += 1
+            userdata["level"] = (userdata["totalexp"] // fixedrate)
 
             # Make the level up embed
             levelembed = discord.Embed(title="**Level Up!**", description=f"**<@{userid}> has levelled up to level {userdata["level"]}\n\nExp needed for next level**: {fixedrate}")
             levelembed.set_thumbnail(url=message.author.avatar)
             levelembed.set_footer(text=bot.user.name, icon_url=bot.user.avatar)
             
-            await message.channel.send(embed=levelembed)
             userdata["exp"] = 0
+            await message.channel.send(embed=levelembed)
+            
     else:  # Exp needed increases for every level
         
         baserate = 30
 
         expneeded = baserate * ((userdata["level"] + 1) * 2)
-
-        if userdata["exp"] % expneeded == 0:
+        if userdata["level"] != userdata["totalexp"] // expneeded:
             # Level up
-            
-            #if userdata["exp"] == expneeded:
             userdata["level"] = userdata["totalexp"] // expneeded
             
             # Make the level up embed
@@ -83,6 +80,15 @@ async def expUp(message, expincrease):
         json.dump(userdata, file)
     pass
 
+
+def fetchLevelLeaderboard():
+    leaderboard = []
+    for files in os.listdir("users/"):
+        with open(f"users/{files}", "r") as file:
+            global userdata
+            userdata = json.load(file)
+            print(userdata["level"])
+            leaderboard.append([files.replace(".json", ""), userdata["level"]])
 
 @bot.event
 async def on_ready():
@@ -116,6 +122,10 @@ async def self(ctx):
 async def self(ctx, member:discord.User, exp:int):
     await expUp(ctx.message, exp)
     await ctx.send(f"Gave <@{member.id}> {exp} EXP!")
+    
+@bot.command("leaderboard")
+async def self(ctx):
+    fetchLevelLeaderboard()
     
 # Start the bot.
 load_dotenv()
