@@ -11,7 +11,7 @@
 
 ##  What is this :question:
 
-This Discord bot allows you to play TTS messages in the voice channel you are currently in.
+This Discord bot allows you to level up by sending messages and compete to see who can reach the highest level.
 
 - If you encounter any problems with the bot please make an issue [here](https://github.com/JugieNoob/Discord-Levels-Bot/issues) and i will try my best to solve them.
 
