@@ -19,6 +19,14 @@ if not os.path.exists("users"):
     os.makedirs("users")
 
 
+helpembed = discord.Embed(title="Help Menu ❓", description="Shows information about commands.")
+helpembed.add_field(name="level", value="Tells you how many levels you have.", inline=False)
+helpembed.add_field(name="leaderboard {totalexp | level}", value="Displays the server level/total exp leaderboard", inline=False)
+
+
+infoembed = discord.Embed(title="Info Menu :information_source:")
+infoembed.add_field(name="Bot Creator", value="[Jugie](https://github.com/JugieNoob)", inline=False)
+infoembed.add_field(name="Bot Source Code", value="[Github](https://github.com/JugieNoob/Discord-Levels-Bot)", inline=False)
 
 async def expUp(message, expincrease):
     global expneeded
@@ -171,6 +179,21 @@ async def self(ctx, choice = ""):
         await ctx.send(embed=fetchExpLeaderboard())
     else:
         await ctx.send("Invalid choice! Please enter 'level' or 'totalexp'!")
+        
+@bot.command("help")
+async def self(ctx):
+    helpembed.set_thumbnail(url=bot.user.avatar)
+    helpembed.set_footer(text=bot.user.name, icon_url=bot.user.avatar)
+
+    await ctx.send(embed=helpembed)
+    
+@bot.command("info")
+async def self(ctx):
+    infoembed.set_thumbnail(url=bot.user.avatar)
+    infoembed.set_footer(text=bot.user.name, icon_url=bot.user.avatar)
+    await ctx.send(embed=infoembed)
+    
+
     
 # Start the bot.
 load_dotenv()
