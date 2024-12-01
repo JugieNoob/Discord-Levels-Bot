@@ -1,4 +1,4 @@
-# Discord TTS Bot 🎤
+# Discord Levels Bot ⬆️
 
 <img src="imgs/LevelsBot.png" width=300>
 
